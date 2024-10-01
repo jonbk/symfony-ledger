@@ -1,0 +1,4 @@
+GET http://ledger.localhost/
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer your_api_key
