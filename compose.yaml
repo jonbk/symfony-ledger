@@ -1,0 +1,22 @@
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    volumes:
+      - .:/var/www/html
+    environment:
+      VIRTUAL_HOST: ledger.localhost
+    expose:
+      - 80
+    networks:
+      - reverse-proxy
+      - default
+
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+
+networks:
+  reverse-proxy:
+    external: true
