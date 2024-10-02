@@ -8,6 +8,8 @@ services:
       - .:/var/www/html
     environment:
       VIRTUAL_HOST: ledger.localhost
+      AWS_ACCESS_KEY_ID: 'test'
+      AWS_SECRET_ACCESS_KEY: 'test'
     expose:
       - 80
     networks:
@@ -16,6 +18,8 @@ services:
 
   dynamodb:
     image: amazon/dynamodb-local:latest
+    ports:
+      - "8000:8000"
 
 networks:
   reverse-proxy:

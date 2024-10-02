@@ -1,19 +1,16 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
-
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
   ledger.apiKey: '%env(LEDGER_API_KEY)%'
+  ledger.tableName: '%env(LEDGER_TABLE_NAME)%'
+  ledger.privateKey: '%env(base64:LEDGER_SIGNATURE_PRIVATE_KEY)%'
+  ledger.publicKey: '%env(base64:LEDGER_SIGNATURE_PUBLIC_KEY)%'
+  aws.dynamodb.endpoint: '%env(AWS_DYNAMODB_ENDPOINT)%'
+  aws.dynamodb.region: '%env(AWS_REGION)%'
 
 services:
-  # default configuration for services in *this* file
   _defaults:
-    autowire: true      # Automatically injects dependencies in your services.
-    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    autowire: true
+    autoconfigure: true
 
-  # makes classes in src/ available to be used as services
-  # this creates a service per class whose id is the fully-qualified class name
   App\:
     resource: '../src/'
     exclude:
@@ -21,9 +18,23 @@ services:
       - '../src/Entity/'
       - '../src/Kernel.php'
 
-  # add more service definitions when explicit configuration is needed
-  # please note that last definitions always *replace* previous ones
-
   App\Security\ApiKeyAuthenticator:
     arguments:
       $apiKey: '%ledger.apiKey%'
+
+  App\Command\InitBlockchain:
+    arguments:
+      $tableName: '%ledger.tableName%'
+
+  Aws\DynamoDb\DynamoDbClient:
+    factory:
+      [ 'App\Factory\DynamoDbClientFactory', 'createDynamoDbClient' ]
+    arguments:
+      $endpoint: '%aws.dynamodb.endpoint%'
+      $region: '%aws.dynamodb.region%'
+
+  App\Service\Blockchain:
+    arguments:
+      $tableName: '%ledger.tableName%'
+      $privateKey: '%ledger.privateKey%'
+      $publicKey: '%ledger.publicKey%'

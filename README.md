@@ -6,28 +6,19 @@ This project is a self-contained API built with Symfony that allows you to creat
 
 Each block in the blockchain has the following attributes:
 
-- **id**: A unique identifier for the block.
+- **uuid**: A unique identifier for the block.
+- **timestamp**: The timestamp when the block was created.
 - **identifier**: A human-readable unique name for the block.
+- **author**: The author of the action associated with this block.
 - **action**: The name of the action associated with this block.
-- **date**: The date when the block was created.
+- **date**: The date when the action was made.
 - **metadata**: Additional information related to the block.
 - **signature**: Each block's signature is calculated using the signature of the previous block, ensuring the integrity of the blockchain.
+- **previousSignature**: The signature of the previous block in the blockchain.
 
 ## DynamoDB Requirements
 
 This project requires a storage solution to hold the blockchain data. You will use Amazon DynamoDB as your database solution.
-
-Make sure to set up your DynamoDB table to store the blocks. You can create the table with the following attributes:
-
-- **id** (primary key): A sequential number for each block.
-- **identifier**: A human-readable unique name for the block.
-- **action**: The name of the action associated with the block.
-- **date**: The date when the block was created.
-- **metadata**: Additional information related to the block.
-- **signature**: Each block's signature.
-
-## DynamoDB Configuration
-
 Ensure that your AWS environment is configured to assume the necessary IAM role that has permissions to access DynamoDB. You can use the AWS SDK for PHP to interact with DynamoDB, and it will automatically utilize the assumed role.
 
 ## Environment Variables
