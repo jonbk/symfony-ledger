@@ -36,10 +36,10 @@ final class Block
     #[ORM\Column(type: Types::JSON)]
     private array $metadata;
 
-    #[ORM\Column(type: Types::STRING, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 1024, nullable: true)]
     private ?string $previousSignature;
 
-    #[ORM\Column(type: Types::STRING)]
+    #[ORM\Column(type: Types::STRING, length: 1024)]
     private ?string $signature;
 
     public function __construct(
@@ -59,6 +59,7 @@ final class Block
         $this->date = $date;
         $this->metadata = $metadata;
         $this->previousSignature = $previousSignature;
+        $this->signature = null;
     }
 
     public function getUuid(): Uuid

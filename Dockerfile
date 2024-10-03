@@ -2,7 +2,6 @@ FROM php:8.3-apache-bookworm
 
 RUN useradd -ms /bin/bash php_user
 
-# add pgsql to php
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     git \
