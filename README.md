@@ -16,25 +16,27 @@ Each block in the blockchain has the following attributes:
 - **signature**: Each block's signature is calculated using the signature of the previous block, ensuring the integrity of the blockchain.
 - **previousSignature**: The signature of the previous block in the blockchain.
 
-## DynamoDB Requirements
+## Database Requirements
 
-This project requires a storage solution to hold the blockchain data. You will use Amazon DynamoDB as your database solution.
-Ensure that your AWS environment is configured to assume the necessary IAM role that has permissions to access DynamoDB. You can use the AWS SDK for PHP to interact with DynamoDB, and it will automatically utilize the assumed role.
+This project requires a storage solution to hold the blockchain data. You will use PostgreSQL as your database solution.
+Ensure that your AWS environment is configured to assume the necessary IAM role that has permissions to access database.
 
 ## Environment Variables
 
 To configure the API, you need to set the following environment variables, in addition to other Symfony environment variables:
 
-- **API_KEY**: This key is required to access the API.
-- **BLOCKCHAIN_PRIVATE_KEY**: This private key is used for signing blocks in the blockchain.
-- **AWS_REGION**: The AWS region where your DynamoDB table is hosted.
+- **LEDGER_API_KEY**: This key is required to access the API.
+- **LEDGER_SIGNATURE_PRIVATE_KEY**: This private key is used for signing blocks in the blockchain.
+- **LEDGER_SIGNATURE_PUBLIC_KEY**: This public key is used for verify blocks in the blockchain.
 
 ### Example `.env` Configuration
 
 ```dotenv
-API_KEY=your_api_key
-BLOCKCHAIN_PRIVATE_KEY=your_private_key
-AWS_REGION=us-west-2
+###> jonbk/symfony-ledger ###
+LEDGER_API_KEY=your_api_key
+LEDGER_SIGNATURE_PUBLIC_KEY=your_public_key
+LEDGER_SIGNATURE_PRIVATE_KEY=your_private_key
+###< jonbk/symfony-ledger ###
 ```
 
 ## Usage
