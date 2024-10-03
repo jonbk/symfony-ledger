@@ -1,21 +1,45 @@
 <?php
 
-namespace App\Model;
+namespace App\Entity;
 
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
+use App\Repository\BlockRepository;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Uid\Uuid;
 
+#[ORM\Entity(repositoryClass: BlockRepository::class)]
+#[ORM\Index(columns: ['timestamp'])]
+#[ORM\Index(columns: ['action'])]
+#[ORM\Index(columns: ['identifier'])]
 final class Block
 {
-    private UuidInterface $uuid;
+    #[ORM\Id]
+    #[ORM\Column(type: UuidType::NAME)]
+    private Uuid $uuid;
+
+    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     private \DateTimeImmutable $timestamp;
+
+    #[ORM\Column(type: Types::STRING)]
     private string $action;
+
+    #[ORM\Column(type: Types::STRING)]
     private string $identifier;
+
+    #[ORM\Column(type: Types::STRING)]
     private string $author;
+
+    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     private \DateTimeImmutable $date;
+
+    #[ORM\Column(type: Types::JSON)]
     private array $metadata;
+
+    #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $previousSignature;
+
+    #[ORM\Column(type: Types::STRING)]
     private ?string $signature;
 
     public function __construct(
@@ -27,7 +51,7 @@ final class Block
         ?string            $previousSignature
     )
     {
-        $this->uuid = Uuid::uuid4();
+        $this->uuid = Uuid::v4();
         $this->timestamp = new \DateTimeImmutable();
         $this->action = $action;
         $this->identifier = $identifier;
@@ -37,7 +61,7 @@ final class Block
         $this->previousSignature = $previousSignature;
     }
 
-    public function getUuid(): UuidInterface
+    public function getUuid(): Uuid
     {
         return $this->uuid;
     }
@@ -89,15 +113,15 @@ final class Block
         return $this;
     }
 
-    public function toSign(): string
+    public function payloadToSign(): string
     {
         return json_encode([
             'uuid' => $this->uuid->toString(),
-            'timestamp' => $this->timestamp->format('Y-m-d\TH:i:s.v\Z'),
+            'timestamp' => $this->timestamp->format(DATE_ATOM),
             'action' => $this->action,
             'identifier' => $this->identifier,
             'author' => $this->author,
-            'date' => $this->date->format('Y-m-d\TH:i:s.v\Z'),
+            'date' => $this->date->format(DATE_ATOM),
             'metadata' => $this->metadata,
             'previousSignature' => $this->previousSignature
         ]);

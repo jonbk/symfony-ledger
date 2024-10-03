@@ -2,42 +2,52 @@
 
 namespace App\Service;
 
-use App\Model\Block;
-use Aws\DynamoDb\DynamoDbClient;
+use App\Entity\Block;
+use App\Repository\BlockRepository;
 
 final readonly class Blockchain
 {
     public function __construct(
-        private DynamoDbClient $dynamoDbClient,
-        private string         $tableName,
-        private string         $privateKey,
-        private string         $publicKey
+        private BlockRepository $blockRepository,
+        private string          $privateKey,
+        private string          $publicKey
     )
     {
     }
 
-    public function signBlock(Block $new): void
+    /*
+     * TODO add locking mechanism
+     */
+    public function addBlock(
+        string             $action,
+        string             $identifier,
+        string             $author,
+        \DateTimeImmutable $date,
+        array              $metadata
+    ): Block
     {
-        openssl_sign($new->toSign(), $signature, $this->privateKey);
+        $latestBlock = $this->blockRepository->findLatest();
 
-        $new->setSignature(base64_encode($signature));
+        $block = new Block(
+            $action,
+            $identifier,
+            $author,
+            $date,
+            $metadata,
+            $latestBlock instanceof Block ? $latestBlock->getSignature() : null
+        );
+
+        $this->signBlock($block);
+
+        $this->blockRepository->save($block);
+
+        return $block;
     }
 
-    public function storeBlock(Block $block): void
+    private function signBlock(Block $block): void
     {
-        $this->dynamoDbClient->putItem([
-            'TableName' => $this->tableName,
-            'Item' => [
-                'uuid' => ['S' => $block->getUuid()->toString()],
-                'timestamp' => ['S' => $block->getTimestamp()->format(DATE_ATOM)],
-                'action' => ['S' => $block->getAction()],
-                'identifier' => ['S' => $block->getIdentifier()],
-                'author' => ['S' => $block->getAuthor()],
-                'date' => ['S' => $block->getDate()->format(DATE_ATOM)],
-                'metadata' => ['S' => json_encode($block->getMetadata())],
-                'previousSignature' => $block->getPreviousSignature() ? ['S' => $block->getPreviousSignature()] : ['NULL' => true],
-                'signature' => ['S' => $block->getSignature()],
-            ]
-        ]);
+        openssl_sign($block->payloadToSign(), $signature, $this->privateKey);
+
+        $block->setSignature(base64_encode($signature));
     }
 }

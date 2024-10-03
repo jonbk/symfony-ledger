@@ -1,10 +1,7 @@
 parameters:
   ledger.apiKey: '%env(LEDGER_API_KEY)%'
-  ledger.tableName: '%env(LEDGER_TABLE_NAME)%'
   ledger.privateKey: '%env(base64:LEDGER_SIGNATURE_PRIVATE_KEY)%'
   ledger.publicKey: '%env(base64:LEDGER_SIGNATURE_PUBLIC_KEY)%'
-  aws.dynamodb.endpoint: '%env(AWS_DYNAMODB_ENDPOINT)%'
-  aws.dynamodb.region: '%env(AWS_REGION)%'
 
 services:
   _defaults:
@@ -22,19 +19,7 @@ services:
     arguments:
       $apiKey: '%ledger.apiKey%'
 
-  App\Command\InitBlockchain:
-    arguments:
-      $tableName: '%ledger.tableName%'
-
-  Aws\DynamoDb\DynamoDbClient:
-    factory:
-      [ 'App\Factory\DynamoDbClientFactory', 'createDynamoDbClient' ]
-    arguments:
-      $endpoint: '%aws.dynamodb.endpoint%'
-      $region: '%aws.dynamodb.region%'
-
   App\Service\Blockchain:
     arguments:
-      $tableName: '%ledger.tableName%'
       $privateKey: '%ledger.privateKey%'
       $publicKey: '%ledger.publicKey%'

@@ -3,23 +3,24 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: base
     volumes:
       - .:/var/www/html
     environment:
       VIRTUAL_HOST: ledger.localhost
-      AWS_ACCESS_KEY_ID: 'test'
-      AWS_SECRET_ACCESS_KEY: 'test'
     expose:
       - 80
     networks:
       - reverse-proxy
       - default
 
-  dynamodb:
-    image: amazon/dynamodb-local:latest
+  db:
+    image: postgres:16
     ports:
-      - "8000:8000"
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: ledger
+      POSTGRES_PASSWORD: ledger
+      POSTGRES_USER: ledger
 
 networks:
   reverse-proxy:
