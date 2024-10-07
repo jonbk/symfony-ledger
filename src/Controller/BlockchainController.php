@@ -2,18 +2,27 @@
 
 namespace App\Controller;
 
+use App\Service\Blockchain;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
 class BlockchainController extends AbstractController
 {
-    #[Route('/', name: 'app_index')]
-    public function index(): JsonResponse
+    #[Route('/blocks', name: 'post_block', methods: ['POST'])]
+    public function addBlock(Request $request, Blockchain $blockchain): JsonResponse
     {
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/BlockchainController.php',
-        ]);
+        $data = json_decode($request->getContent(), true);
+
+        $block = $blockchain->addBlock(
+            $data['action'],
+            $data['identifier'],
+            $data['author'],
+            new \DateTimeImmutable($data['date']),
+            $data['metadata']
+        );
+
+        return $this->json($block);
     }
 }

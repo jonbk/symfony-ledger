@@ -2,10 +2,11 @@
 
 namespace App\Entity;
 
+use App\Doctrine\Type\DateTimeImmutableMsType;
 use App\Repository\BlockRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
-use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: BlockRepository::class)]
@@ -18,7 +19,7 @@ final class Block
     #[ORM\Column(type: UuidType::NAME)]
     private Uuid $uuid;
 
-    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    #[ORM\Column(type: DateTimeImmutableMsType::NAME)]
     private \DateTimeImmutable $timestamp;
 
     #[ORM\Column(type: Types::STRING)]
@@ -30,7 +31,7 @@ final class Block
     #[ORM\Column(type: Types::STRING)]
     private string $author;
 
-    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $date;
 
     #[ORM\Column(type: Types::JSON)]
@@ -52,7 +53,7 @@ final class Block
     )
     {
         $this->uuid = Uuid::v4();
-        $this->timestamp = new \DateTimeImmutable();
+        $this->timestamp = \DateTimeImmutable::createFromFormat('U.u', sprintf('%.6F', microtime(true)));
         $this->action = $action;
         $this->identifier = $identifier;
         $this->author = $author;
