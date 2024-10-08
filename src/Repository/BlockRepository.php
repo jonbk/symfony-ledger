@@ -28,4 +28,18 @@ class BlockRepository extends ServiceEntityRepository
         $this->getEntityManager()->persist($block);
         $this->getEntityManager()->flush();
     }
+
+    public function findAllUuids(): array
+    {
+        return $this->createQueryBuilder('b')
+            ->select('b.uuid')
+            ->orderBy('b.timestamp', 'ASC')
+            ->getQuery()
+            ->getSingleColumnResult();
+    }
+
+    public function clear(): void
+    {
+        $this->getEntityManager()->clear();
+    }
 }

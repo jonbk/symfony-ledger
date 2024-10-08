@@ -1,0 +1,27 @@
+meta {
+  name: Block
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/blocks
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{apiKey}}
+}
+
+body:json {
+  {
+    "action": "TEST_BLOCK",
+    "identifier": "TEST_BLOCK",
+    "author": "JBUYCK",
+    "date": "2024-10-08T09:15:06+00:00",
+    "metadata": {
+      "test": "test"
+    }
+  }
+}

@@ -4,10 +4,13 @@ namespace App\Service;
 
 use App\Entity\Block;
 use App\Repository\BlockRepository;
+use Symfony\Component\Lock\Exception\LockConflictedException;
+use Symfony\Component\Lock\LockFactory;
 
 final readonly class Blockchain
 {
     public function __construct(
+        private LockFactory     $lockFactory,
         private BlockRepository $blockRepository,
         private string          $privateKey,
         private string          $publicKey
@@ -15,9 +18,6 @@ final readonly class Blockchain
     {
     }
 
-    /*
-     * TODO add locking mechanism
-     */
     public function addBlock(
         string             $action,
         string             $identifier,
@@ -26,28 +26,86 @@ final readonly class Blockchain
         array              $metadata
     ): Block
     {
-        $latestBlock = $this->blockRepository->findLatest();
+        $lock = $this->lockFactory->createLock('ledger_lock');
 
-        $block = new Block(
-            $action,
-            $identifier,
-            $author,
-            $date,
-            $metadata,
-            $latestBlock instanceof Block ? $latestBlock->getSignature() : null
-        );
+        try {
+            $lock->acquire(true);
 
-        $this->signBlock($block);
+            $latestBlock = $this->blockRepository->findLatest();
 
-        $this->blockRepository->save($block);
+            $block = new Block(
+                $action,
+                $identifier,
+                $author,
+                $date,
+                $metadata,
+                $latestBlock instanceof Block ? $latestBlock->getSignature() : null
+            );
+
+            openssl_sign($block->payloadToSign(), $signature, $this->privateKey);
+
+            $block
+                ->setSignature(base64_encode($signature))
+                ->setSignatureVerified(true);
+
+
+            $this->blockRepository->save($block);
+        } catch (LockConflictedException $e) {
+            throw new \RuntimeException('Impossible d\'ajouter un bloc pour le moment.', 0, $e);
+        } finally {
+            if ($lock->isAcquired()) {
+                $lock->release();
+            }
+        }
 
         return $block;
     }
 
-    private function signBlock(Block $block): void
+    public function getBlocks(int $page, int $limit = 25): array
     {
-        openssl_sign($block->payloadToSign(), $signature, $this->privateKey);
+        $qb = $this->blockRepository->createQueryBuilder('b')
+            ->orderBy('b.timestamp', 'DESC')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
 
-        $block->setSignature(base64_encode($signature));
+        return $qb->getQuery()->getResult();
+    }
+
+    public function verifySignature(Block $block): bool
+    {
+        $payload = $block->payloadToSign();
+
+        $valid = openssl_verify($payload, base64_decode($block->getSignature()), $this->publicKey) === 1;
+
+        $block->setSignatureVerified($valid);
+
+        return $valid;
+    }
+
+    public function checkBlockchainValidity(): bool
+    {
+        $blocksUuids = $this->blockRepository->findAllUuids();
+
+        $previousBlock = null;
+        foreach ($blocksUuids as $uuid) {
+            $block = $this->blockRepository->find($uuid);
+
+            if (
+                $previousBlock instanceof Block
+                && $block->getPreviousSignature() !== $previousBlock->getSignature()
+            ) {
+                return false;
+            }
+
+            if (!$this->verifySignature($block)) {
+                return false;
+            }
+
+            $previousBlock = $block;
+
+            $this->blockRepository->clear();
+        }
+
+        return true;
     }
 }

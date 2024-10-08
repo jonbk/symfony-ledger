@@ -13,7 +13,7 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Index(columns: ['timestamp'])]
 #[ORM\Index(columns: ['action'])]
 #[ORM\Index(columns: ['identifier'])]
-final class Block
+final class Block implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME)]
@@ -41,7 +41,9 @@ final class Block
     private ?string $previousSignature;
 
     #[ORM\Column(type: Types::STRING, length: 1024)]
-    private ?string $signature;
+    private ?string $signature = null;
+
+    private ?bool $verified = null;
 
     public function __construct(
         string             $action,
@@ -60,7 +62,6 @@ final class Block
         $this->date = $date;
         $this->metadata = $metadata;
         $this->previousSignature = $previousSignature;
-        $this->signature = null;
     }
 
     public function getUuid(): Uuid
@@ -115,6 +116,13 @@ final class Block
         return $this;
     }
 
+    public function setSignatureVerified(bool $verified): self
+    {
+        $this->verified = $verified;
+
+        return $this;
+    }
+
     public function payloadToSign(): string
     {
         return json_encode([
@@ -127,5 +135,21 @@ final class Block
             'metadata' => $this->metadata,
             'previousSignature' => $this->previousSignature
         ]);
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'uuid' => $this->uuid->toString(),
+            'timestamp' => $this->timestamp->format('Y-m-d\TH:i:s.uP'),
+            'action' => $this->action,
+            'identifier' => $this->identifier,
+            'author' => $this->author,
+            'date' => $this->date->format(DATE_ATOM),
+            'metadata' => $this->metadata,
+            'previousSignature' => $this->previousSignature,
+            'signature' => $this->signature,
+            'verified' => $this->verified
+        ];
     }
 }

@@ -25,4 +25,18 @@ class BlockchainController extends AbstractController
 
         return $this->json($block);
     }
+
+    #[Route('/blocks', name: 'get_blocks', methods: ['GET'])]
+    public function getBlocks(Request $request, Blockchain $blockchain): JsonResponse
+    {
+        $page = $request->query->getInt('page', 1);
+
+        $blocks = $blockchain->getBlocks($page);
+
+        foreach ($blocks as $block) {
+            $blockchain->verifySignature($block);
+        }
+
+        return new JsonResponse($blocks);
+    }
 }
