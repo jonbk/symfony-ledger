@@ -13,7 +13,7 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Index(columns: ['timestamp'])]
 #[ORM\Index(columns: ['action'])]
 #[ORM\Index(columns: ['identifier'])]
-final class Block implements \JsonSerializable
+class Block implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME)]
