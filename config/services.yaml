@@ -1,5 +1,5 @@
 parameters:
-  ledger.apiKey: '%env(LEDGER_API_KEY)%'
+  ledger.apiKey: '%env(base64:LEDGER_API_KEY)%'
   ledger.privateKey: '%env(base64:LEDGER_SIGNATURE_PRIVATE_KEY)%'
   ledger.publicKey: '%env(base64:LEDGER_SIGNATURE_PUBLIC_KEY)%'
 
