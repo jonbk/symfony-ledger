@@ -5,7 +5,7 @@ use App\Kernel;
 require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
 
 $_SERVER['APP_RUNTIME_OPTIONS'] = [
-    'disable_dotenv' => $_SERVER['APP_ENV'] === 'prod',
+    'disable_dotenv' => ($_SERVER['APP_ENV'] ?? null) === 'prod',
 ];
 
 return function (array $context) {

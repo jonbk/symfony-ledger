@@ -108,4 +108,9 @@ final readonly class Blockchain
 
         return true;
     }
+
+    public function countBlocks():int
+    {
+        return $this->blockRepository->count();
+    }
 }

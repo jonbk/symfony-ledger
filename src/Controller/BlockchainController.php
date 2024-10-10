@@ -32,11 +32,15 @@ class BlockchainController extends AbstractController
         $page = $request->query->getInt('page', 1);
 
         $blocks = $blockchain->getBlocks($page);
+        $count = $blockchain->countBlocks();
 
         foreach ($blocks as $block) {
             $blockchain->verifySignature($block);
         }
 
-        return new JsonResponse($blocks);
+        return new JsonResponse([
+            'blocks' => $blocks,
+            'count' => $count,
+        ]);
     }
 }
