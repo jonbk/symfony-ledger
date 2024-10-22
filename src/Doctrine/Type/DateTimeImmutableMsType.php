@@ -27,6 +27,11 @@ class DateTimeImmutableMsType extends Type
         }
 
         $val = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s.u', $value);
+
+        if (!$val) {
+            $val = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $value);
+        }
+
         if (!$val) {
             throw ConversionException::conversionFailedFormat($value, $this->getName(), 'Y-m-d H:i:s.u');
         }
