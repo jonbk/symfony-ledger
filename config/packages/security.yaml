@@ -5,10 +5,14 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        health:
+            pattern: ^/health$
+            security: false
         main:
             pattern: ^/
             stateless: true
             custom_authenticator: App\Security\ApiKeyAuthenticator
 
     access_control:
+        - { path: ^/health$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/, roles: ROLE_USER }
