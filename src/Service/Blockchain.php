@@ -51,8 +51,8 @@ final readonly class Blockchain
 
             $this->blockRepository->save($block);
 
-            // Ensure minimum time between blocks timestamp of 1ms
-            usleep(1000);
+            // Ensure minimum time between blocks timestamp of 1 microsecond
+            usleep(1);
         } catch (LockConflictedException $e) {
             throw new \RuntimeException('Impossible d\'ajouter un bloc pour le moment.', 0, $e);
         } finally {
