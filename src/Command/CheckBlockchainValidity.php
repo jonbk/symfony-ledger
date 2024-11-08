@@ -30,10 +30,12 @@ final class CheckBlockchainValidity extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        if($this->blockchain->checkBlockchainValidity()) {
+        $wrongBlock = $this->blockchain->checkBlockchainValidity();
+
+        if ($wrongBlock === null) {
             $io->success('The blockchain is valid.');
         } else {
-            $io->error('The blockchain is not valid.');
+            $io->error(sprintf('The blockchain is not valid. The block with UUID %s is invalid. payload: %s', $wrongBlock->getUuid(), $wrongBlock->payloadToSign()));
         }
 
         return Command::SUCCESS;

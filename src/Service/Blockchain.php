@@ -85,8 +85,10 @@ final readonly class Blockchain
         return $valid;
     }
 
-    public function checkBlockchainValidity(): bool
+    public function checkBlockchainValidity(): ?Block
     {
+        ini_set('memory_limit', '-1');
+
         $blocksUuids = $this->blockRepository->findAllUuids();
 
         $previousBlock = null;
@@ -97,11 +99,11 @@ final readonly class Blockchain
                 $previousBlock instanceof Block
                 && $block->getPreviousSignature() !== $previousBlock->getSignature()
             ) {
-                return false;
+                return $block;
             }
 
             if (!$this->verifySignature($block)) {
-                return false;
+                return $block;
             }
 
             $previousBlock = $block;
@@ -109,7 +111,7 @@ final readonly class Blockchain
             $this->blockRepository->clear();
         }
 
-        return true;
+        return null;
     }
 
     public function countBlocks(): int

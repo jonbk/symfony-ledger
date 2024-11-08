@@ -43,4 +43,16 @@ class BlockchainController extends AbstractController
             'count' => $count,
         ]);
     }
+
+    #[Route('/blocks/validity', name: 'check_blockchain_validity', methods: ['GET'])]
+    public function checkBlockchainValidity(Blockchain $blockchain): JsonResponse
+    {
+        $wrongBlock = $blockchain->checkBlockchainValidity();
+
+        if ($wrongBlock === null) {
+            return new JsonResponse(['message' => 'The blockchain is valid.']);
+        } else {
+            return new JsonResponse(['message' => 'The blockchain is not valid. The block with UUID ' . $wrongBlock->getUuid() . ' is invalid. payload: ' . $wrongBlock->payloadToSign()], 400);
+        }
+    }
 }
