@@ -50,6 +50,9 @@ final readonly class Blockchain
 
 
             $this->blockRepository->save($block);
+
+            // Ensure minimum time between blocks timestamp of 1ms
+            usleep(1000);
         } catch (LockConflictedException $e) {
             throw new \RuntimeException('Impossible d\'ajouter un bloc pour le moment.', 0, $e);
         } finally {
@@ -109,7 +112,7 @@ final readonly class Blockchain
         return true;
     }
 
-    public function countBlocks():int
+    public function countBlocks(): int
     {
         return $this->blockRepository->count();
     }

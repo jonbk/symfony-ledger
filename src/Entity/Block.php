@@ -127,7 +127,7 @@ class Block implements \JsonSerializable
     {
         return json_encode([
             'uuid' => $this->uuid->toString(),
-            'timestamp' => $this->timestamp->format(DATE_ATOM),
+            'timestamp' => $this->timestamp->format('Y-m-d\TH:i:s.uP'),
             'action' => $this->action,
             'identifier' => $this->identifier,
             'author' => $this->author,
