@@ -1,0 +1,73 @@
+{
+  "action": "VALIDATE_SALE",
+  "identifier": "T2301-000001",
+  "author": "superadmin@cyberautopieces.fr",
+  "date": "2023-01-03 08:39:29",
+  "metadata": {
+    "sale": {
+      "id": 2,
+      "number": "T2301-000001",
+      "type": "ticket",
+      "third_party": {
+        "id": 1,
+        "name": "Comptoir",
+        "vat_number": "",
+        "siret": "",
+        "address": "",
+        "zip_code": "",
+        "city": "",
+        "country": "fr"
+      },
+      "total_vat_excluded": 29.48,
+      "total_vat": 5.9,
+      "total_vat_included": 35.38,
+      "status": "validated",
+      "validated_at": "2023-01-03 08:39:29",
+      "comment": "T2301-000001 => Num\u00e9ro avant correction du bug num\u00e9rotation ",
+      "payment_terms": "upon_receipt",
+      "limit_date_payment": null,
+      "online": false,
+      "creator": "guilain@cyberautopieces.fr",
+      "onlineCreator": null,
+      "lines": [
+        {
+          "id": 2,
+          "sale": "T2301-000001",
+          "type": "product",
+          "label": "100318 DEXRON III 2L",
+          "quantity": 2,
+          "unit_price": 32.75,
+          "discount": 55,
+          "custom_unit_price": 14.74,
+          "custom_total_price": 29.48,
+          "vat_rate": 20,
+          "unit_vat_amount": 2.95,
+          "total_vat_amount": 5.9
+        }
+      ],
+      "payment": {
+        "id": 1,
+        "sale": "T2301-000001",
+        "note": null,
+        "status": "paid",
+        "total_paid": 35.38,
+        "left_to_pay": 0,
+        "closed_at": "2023-01-03 08:39:29",
+        "settlements": [
+          {
+            "id": 1,
+            "sale": "T2301-000001",
+            "number": "P2301-000001",
+            "date": "2023-01-03 08:39:29",
+            "type": "CARD",
+            "amount": 35.38,
+            "vat_rate": 20,
+            "note": null,
+            "cash": 0,
+            "giveback": 0
+          }
+        ]
+      }
+    }
+  }
+}

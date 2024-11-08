@@ -12,7 +12,7 @@ class DateTimeImmutableMsType extends Type
 
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
-        return 'TIMESTAMP(3)';
+        return 'TIMESTAMP(6)';
     }
 
     public function getName(): string

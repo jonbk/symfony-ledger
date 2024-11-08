@@ -51,7 +51,7 @@ class Block implements \JsonSerializable
         string             $author,
         \DateTimeImmutable $date,
         array              $metadata,
-        ?string            $previousSignature
+        ?string            $previousSignature,
     )
     {
         $this->uuid = Uuid::v4();
