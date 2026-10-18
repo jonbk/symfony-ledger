@@ -14,3 +14,9 @@ when@test:
         test: true
         session:
             storage_factory_id: session.storage.factory.mock_file
+
+when@dev:
+    framework:
+        # Traefik local (ledger.cyberautopieces.test) termine le TLS
+        trusted_proxies: 'PRIVATE_SUBNETS'
+        trusted_headers: ['x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port']

@@ -6,14 +6,19 @@ services:
       target: base
     volumes:
       - .:/var/www/html
-    ports:
-      - "8081:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+      - "traefik.http.routers.ledger.rule=Host(`ledger.cyberautopieces.test`)"
+      - "traefik.http.routers.ledger.entrypoints=websecure"
+      - "traefik.http.routers.ledger.tls=true"
+      - "traefik.http.services.ledger.loadbalancer.server.port=8080"
     networks:
-      - reverse-proxy
+      - traefik
       - default
 
   db:
-    image: postgres:16
+    image: postgres:18
     ports:
       - "5433:5432"
     environment:
@@ -22,5 +27,5 @@ services:
       POSTGRES_USER: ledger
 
 networks:
-  reverse-proxy:
+  traefik:
     external: true
