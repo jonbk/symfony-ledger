@@ -17,7 +17,7 @@ class BlockRepository extends ServiceEntityRepository
     public function findLatest(): ?Block
     {
         return $this->createQueryBuilder('b')
-            ->orderBy('b.timestamp', 'DESC')
+            ->orderBy('b.timestamp', \SortDirection::Descending)
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
@@ -33,7 +33,7 @@ class BlockRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('b')
             ->select('b.uuid')
-            ->orderBy('b.timestamp', 'ASC')
+            ->orderBy('b.timestamp', \SortDirection::Ascending)
             ->getQuery()
             ->getSingleColumnResult();
     }

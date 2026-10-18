@@ -15,11 +15,37 @@ class BlockchainController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
+        if (!is_array($data)) {
+            return new JsonResponse(['message' => 'The request body must be a JSON object.'], 400);
+        }
+
+        foreach (['action', 'identifier', 'author', 'date'] as $field) {
+            if (!isset($data[$field]) || !is_string($data[$field]) || trim($data[$field]) === '') {
+                return new JsonResponse(['message' => sprintf('The "%s" field must be a non-empty string.', $field)], 400);
+            }
+        }
+
+        foreach (['action', 'identifier', 'author'] as $field) {
+            if (mb_strlen($data[$field]) > 255) {
+                return new JsonResponse(['message' => sprintf('The "%s" field must not exceed 255 characters.', $field)], 400);
+            }
+        }
+
+        if (!isset($data['metadata']) || !is_array($data['metadata'])) {
+            return new JsonResponse(['message' => 'The "metadata" field must be a JSON object or array.'], 400);
+        }
+
+        try {
+            $date = new \DateTimeImmutable($data['date']);
+        } catch (\Exception) {
+            return new JsonResponse(['message' => 'The "date" field must be a valid date.'], 400);
+        }
+
         $block = $blockchain->addBlock(
             $data['action'],
             $data['identifier'],
             $data['author'],
-            new \DateTimeImmutable($data['date']),
+            $date,
             $data['metadata']
         );
 
@@ -30,6 +56,10 @@ class BlockchainController extends AbstractController
     public function getBlocks(Request $request, Blockchain $blockchain): JsonResponse
     {
         $page = $request->query->getInt('page', 1);
+
+        if ($page < 1) {
+            return new JsonResponse(['message' => 'The "page" parameter must be greater than or equal to 1.'], 400);
+        }
 
         $blocks = $blockchain->getBlocks($page);
         $count = $blockchain->countBlocks();

@@ -6,7 +6,6 @@ use App\Entity\Block;
 use App\Repository\BlockRepository;
 use App\Service\Blockchain;
 use DateTimeImmutable;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,8 +20,7 @@ final class InitBlockchain extends Command
 {
     public function __construct(
         private readonly Blockchain      $blockchain,
-        private readonly BlockRepository $blockRepository,
-        private readonly LoggerInterface $logger
+        private readonly BlockRepository $blockRepository
     )
     {
         parent::__construct();

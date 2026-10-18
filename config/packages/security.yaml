@@ -14,5 +14,5 @@ security:
             custom_authenticator: App\Security\ApiKeyAuthenticator
 
     access_control:
-        - { path: ^/health$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/health$, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: ROLE_USER }

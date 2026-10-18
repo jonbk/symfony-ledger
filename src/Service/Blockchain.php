@@ -67,7 +67,7 @@ final readonly class Blockchain
     public function getBlocks(int $page, int $limit = 25): array
     {
         $qb = $this->blockRepository->createQueryBuilder('b')
-            ->orderBy('b.timestamp', 'DESC')
+            ->orderBy('b.timestamp', \SortDirection::Descending)
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
 

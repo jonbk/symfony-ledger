@@ -19,7 +19,17 @@ services:
     arguments:
       $apiKey: '%ledger.apiKey%'
 
+  # Verrou advisory PostgreSQL : partagé entre toutes les instances de l'application
+  app.ledger_lock.store:
+    class: Symfony\Component\Lock\Store\DoctrineDbalPostgreSqlStore
+    arguments: ['@doctrine.dbal.default_connection']
+
+  app.ledger_lock.factory:
+    class: Symfony\Component\Lock\LockFactory
+    arguments: ['@app.ledger_lock.store']
+
   App\Service\Blockchain:
     arguments:
+      $lockFactory: '@app.ledger_lock.factory'
       $privateKey: '%ledger.privateKey%'
       $publicKey: '%ledger.publicKey%'

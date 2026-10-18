@@ -31,7 +31,7 @@ class ApiKeyAuthenticator extends AbstractAuthenticator
         $authorizationHeader = $request->headers->get('Authorization');
         $apiKey = str_replace('Bearer ', '', $authorizationHeader);
 
-        if ($apiKey !== $this->apiKey) {
+        if (!hash_equals($this->apiKey, $apiKey)) {
             throw new AuthenticationException('Invalid API Key');
         }
 
@@ -39,10 +39,6 @@ class ApiKeyAuthenticator extends AbstractAuthenticator
             public function getRoles(): array
             {
                 return ['ROLE_USER'];
-            }
-
-            public function eraseCredentials(): void
-            {
             }
 
             public function getUserIdentifier(): string

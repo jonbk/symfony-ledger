@@ -3,7 +3,8 @@
 namespace App\Doctrine\Type;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\ConversionException;
+use Doctrine\DBAL\Types\Exception\InvalidFormat;
+use Doctrine\DBAL\Types\Exception\InvalidType;
 use Doctrine\DBAL\Types\Type;
 
 class DateTimeImmutableMsType extends Type
@@ -12,15 +13,10 @@ class DateTimeImmutableMsType extends Type
 
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
-        return 'TIMESTAMP(6)';
+        return 'timestamp_ms';
     }
 
-    public function getName(): string
-    {
-        return self::NAME;
-    }
-
-    public function convertToPHPValue($value, AbstractPlatform $platform)
+    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?\DateTimeImmutable
     {
         if ($value === null) {
             return null;
@@ -33,13 +29,13 @@ class DateTimeImmutableMsType extends Type
         }
 
         if (!$val) {
-            throw ConversionException::conversionFailedFormat($value, $this->getName(), 'Y-m-d H:i:s.u');
+            throw InvalidFormat::new($value, self::NAME, 'Y-m-d H:i:s.u');
         }
 
         return $val;
     }
 
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
     {
         if ($value === null) {
             return null;
@@ -49,11 +45,6 @@ class DateTimeImmutableMsType extends Type
             return $value->format('Y-m-d H:i:s.u');
         }
 
-        throw ConversionException::conversionFailedInvalidType($value, $this->getName(), ['null', 'DateTimeImmutable']);
-    }
-
-    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
-    {
-        return true;
+        throw InvalidType::new($value, self::NAME, ['null', 'DateTimeImmutable']);
     }
 }

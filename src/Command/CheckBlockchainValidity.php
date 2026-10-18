@@ -2,11 +2,7 @@
 
 namespace App\Command;
 
-use App\Entity\Block;
-use App\Repository\BlockRepository;
 use App\Service\Blockchain;
-use DateTimeImmutable;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
