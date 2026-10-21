@@ -6,6 +6,7 @@ use App\Entity\Block;
 use App\Repository\BlockRepository;
 use Symfony\Component\Lock\Exception\LockConflictedException;
 use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Uid\Uuid;
 
 final readonly class Blockchain
 {
@@ -39,7 +40,7 @@ final readonly class Blockchain
                 $author,
                 $date,
                 $metadata,
-                $latestBlock instanceof Block ? $latestBlock->getSignature() : null
+                $latestBlock
             );
 
             openssl_sign($block->payloadToSign(), $signature, $this->privateKey);
@@ -50,9 +51,6 @@ final readonly class Blockchain
 
 
             $this->blockRepository->save($block);
-
-            // Ensure minimum time between blocks timestamp of 1 microsecond
-            usleep(1);
         } catch (LockConflictedException $e) {
             throw new \RuntimeException('Impossible d\'ajouter un bloc pour le moment.', 0, $e);
         } finally {
@@ -85,33 +83,49 @@ final readonly class Blockchain
         return $valid;
     }
 
-    public function checkBlockchainValidity(): ?Block
+    public function checkBlockchainValidity(?Uuid $anchor = null, int $batchSize = 1000): BlockchainValidity
     {
-        ini_set('memory_limit', '-1');
+        $until = $this->blockRepository->findLatest()?->getTimestamp();
+        $this->blockRepository->clear();
 
-        $blocksUuids = $this->blockRepository->findAllUuids();
-
+        $checkedBlocks = 0;
         $previousBlock = null;
-        foreach ($blocksUuids as $uuid) {
-            $block = $this->blockRepository->find($uuid);
+        $anchorFound = $anchor === null;
 
-            if (
-                $previousBlock instanceof Block
-                && $block->getPreviousSignature() !== $previousBlock->getSignature()
-            ) {
-                return $block;
-            }
+        if ($until !== null) {
+            do {
+                $blocks = $this->blockRepository->findBatch($previousBlock?->getTimestamp(), $until, $batchSize);
 
-            if (!$this->verifySignature($block)) {
-                return $block;
-            }
+                foreach ($blocks as $block) {
+                    if ($block->getPreviousSignature() !== $previousBlock?->getSignature()) {
+                        return new BlockchainValidity(
+                            $checkedBlocks,
+                            $previousBlock,
+                            $block,
+                            $previousBlock === null
+                                ? 'The first block of the chain references a previous signature.'
+                                : 'The previous signature does not match the signature of the previous block.'
+                        );
+                    }
 
-            $previousBlock = $block;
+                    if (!$this->verifySignature($block)) {
+                        return new BlockchainValidity($checkedBlocks, $previousBlock, $block, 'The signature is invalid.');
+                    }
 
-            $this->blockRepository->clear();
+                    $anchorFound = $anchorFound || $block->getUuid()->equals($anchor);
+                    $previousBlock = $block;
+                    $checkedBlocks++;
+                }
+
+                $this->blockRepository->clear();
+            } while (count($blocks) === $batchSize);
         }
 
-        return null;
+        if (!$anchorFound) {
+            return new BlockchainValidity($checkedBlocks, $previousBlock, null, sprintf('The anchor block %s is missing from the chain.', $anchor));
+        }
+
+        return new BlockchainValidity($checkedBlocks, $previousBlock);
     }
 
     public function countBlocks(): int

@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Doctrine\Type\DateTimeImmutableMsType;
 use App\Entity\Block;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -29,13 +30,24 @@ class BlockRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    public function findAllUuids(): array
+    /**
+     * @return list<Block>
+     */
+    public function findBatch(?\DateTimeImmutable $after, \DateTimeImmutable $until, int $limit): array
     {
-        return $this->createQueryBuilder('b')
-            ->select('b.uuid')
+        $qb = $this->createQueryBuilder('b')
+            ->where('b.timestamp <= :until')
+            ->setParameter('until', $until, DateTimeImmutableMsType::NAME)
             ->orderBy('b.timestamp', \SortDirection::Ascending)
-            ->getQuery()
-            ->getSingleColumnResult();
+            ->setMaxResults($limit);
+
+        if ($after !== null) {
+            $qb
+                ->andWhere('b.timestamp > :after')
+                ->setParameter('after', $after, DateTimeImmutableMsType::NAME);
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
     public function clear(): void

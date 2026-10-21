@@ -10,7 +10,7 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: BlockRepository::class)]
-#[ORM\Index(columns: ['timestamp'])]
+#[ORM\UniqueConstraint(columns: ['timestamp'])]
 #[ORM\Index(columns: ['action'])]
 #[ORM\Index(columns: ['identifier'])]
 class Block implements \JsonSerializable
@@ -51,17 +51,20 @@ class Block implements \JsonSerializable
         string             $author,
         \DateTimeImmutable $date,
         array              $metadata,
-        ?string            $previousSignature,
+        ?Block             $previousBlock,
     )
     {
         $this->uuid = Uuid::v4();
-        $this->timestamp = \DateTimeImmutable::createFromFormat('U.u', sprintf('%.6F', microtime(true)));
+        $now = \DateTimeImmutable::createFromFormat('U.u', sprintf('%.6F', microtime(true)));
+        // Garantit un timestamp strictement croissant même si l'horloge système recule (NTP)
+        $minimum = $previousBlock?->getTimestamp()->modify('+1 microsecond');
+        $this->timestamp = $minimum !== null && $minimum > $now ? $minimum : $now;
         $this->action = $action;
         $this->identifier = $identifier;
         $this->author = $author;
         $this->date = $date;
         $this->metadata = $metadata;
-        $this->previousSignature = $previousSignature;
+        $this->previousSignature = $previousBlock?->getSignature();
     }
 
     public function getUuid(): Uuid
